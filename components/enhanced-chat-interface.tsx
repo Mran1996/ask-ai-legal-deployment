@@ -51,6 +51,7 @@ export function EnhancedChatInterface({
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [isListening, setIsListening] = useState(false)
   const [speechSupported, setSpeechSupported] = useState(false)
+  const [speechServiceAvailable, setSpeechServiceAvailable] = useState(true)
   const [dynamicSuggestions, setDynamicSuggestions] = useState<string[]>([])
   const [isUploading, setIsUploading] = useState(false)
   const [pdfjsLib, setPdfjsLib] = useState<any>(null)
@@ -404,6 +405,11 @@ export function EnhancedChatInterface({
     try {
       // @ts-ignore - TypeScript doesn't know about webkitSpeechRecognition
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
+      
+      if (!SpeechRecognition) {
+        throw new Error("SpeechRecognition not available")
+      }
+
       const recognition = new SpeechRecognition()
 
       recognition.continuous = false
@@ -421,13 +427,18 @@ export function EnhancedChatInterface({
         console.error("Speech recognition error:", event.error)
         setIsListening(false)
         
-        // Provide user-friendly error messages
+        // Don't show alerts for service-not-allowed to avoid spam
+        if (event.error === 'service-not-allowed') {
+          console.warn("Speech recognition service not available. This is common in some browsers or network environments.")
+          setSpeechServiceAvailable(false)
+          // Silently fail and let user know via UI
+          return
+        }
+        
+        // Provide user-friendly error messages for other errors
         switch (event.error) {
           case 'not-allowed':
             alert("Microphone permission denied. Please allow microphone access and try again.")
-            break
-          case 'service-not-allowed':
-            alert("Speech recognition service is not available. This may be due to:\n• Using HTTP instead of HTTPS\n• Browser security settings\n• Network restrictions\n\nPlease try using Chrome, Edge, or Safari on a secure connection.")
             break
           case 'no-speech':
             alert("No speech detected. Please try speaking again.")
@@ -445,7 +456,7 @@ export function EnhancedChatInterface({
             alert("Language not supported. Please try again.")
             break
           default:
-            alert(`Speech recognition failed: ${event.error}. Please try again.`)
+            console.warn(`Speech recognition failed: ${event.error}`)
         }
       }
 
@@ -457,7 +468,10 @@ export function EnhancedChatInterface({
     } catch (error) {
       console.error("Failed to start speech recognition:", error)
       setIsListening(false)
-      alert("Failed to start speech recognition. Please try again.")
+      // Don't show alert for service-not-allowed errors
+      if (!error.message?.includes('service-not-allowed')) {
+        alert("Failed to start speech recognition. Please try again.")
+      }
     }
   }
 
@@ -840,10 +854,16 @@ export function EnhancedChatInterface({
               size="icon"
               onClick={toggleSpeechRecognition}
               className={`rounded-full h-9 w-9 sm:h-10 sm:w-10 ${
-                isListening ? "bg-red-500 hover:bg-red-600" : "bg-emerald-500 hover:bg-emerald-600 text-white"
+                isListening ? "bg-red-500 hover:bg-red-600" : 
+                !speechServiceAvailable ? "bg-orange-500 hover:bg-orange-600" :
+                "bg-emerald-500 hover:bg-emerald-600 text-white"
               }`}
               disabled={isWaitingForResponse || isUploading}
-              title={isListening ? "Stop recording" : "Start voice input"}
+              title={
+                isListening ? "Stop recording" : 
+                !speechServiceAvailable ? "Voice service unavailable - try typing instead" :
+                "Start voice input"
+              }
             >
               {isListening ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
             </Button>
