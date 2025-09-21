@@ -3,12 +3,12 @@ import { NextResponse } from "next/server";
 
 export const runtime = "edge";
 
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY!,
+});
+
 export async function POST(req: Request) {
   try {
-    const openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY!,
-    });
-    
     const body = await req.json();
     const { messages, documentContext, documentFields } = body;
 

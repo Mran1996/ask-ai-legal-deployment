@@ -1,7 +1,16 @@
 import Stripe from 'stripe';
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+  apiVersion: '2025-05-28.basil',
+});
 import { headers } from 'next/headers';
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabaseClient';
+
+if (!process.env.STRIPE_SECRET_KEY) {
+  throw new Error('STRIPE_SECRET_KEY environment variable is not set.');
+}
+
+const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
 
 async function updateUserSubscription(
   customerId: string,
@@ -39,12 +48,6 @@ async function updateUserSubscription(
 
 export async function POST(req: Request) {
   try {
-    if (!process.env.STRIPE_SECRET_KEY) {
-      throw new Error('STRIPE_SECRET_KEY environment variable is not set.');
-    }
-    
-    const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
-    
     const body = await req.text();
     const signature = req.headers.get('stripe-signature');
 
@@ -54,10 +57,6 @@ export async function POST(req: Request) {
         { status: 400 }
       );
     }
-
-    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-      apiVersion: '2025-05-28.basil',
-    });
 
     let event;
 

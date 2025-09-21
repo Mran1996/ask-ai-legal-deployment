@@ -2,6 +2,11 @@ import { OpenAI } from 'openai';
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabaseClient';
 
+// Initialize OpenAI client
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY
+});
+
 async function getCaseLaw(state: string, category: string) {
   try {
     const perplexityKey = process.env.PERPLEXITY_API_KEY;
@@ -138,9 +143,6 @@ Base your analysis on:
 Provide realistic, data-driven assessments.`;
 
     // Generate analysis using OpenAI
-    const openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY
-    });
     
     const completion = await openai.chat.completions.create({
       model: "gpt-4-turbo",

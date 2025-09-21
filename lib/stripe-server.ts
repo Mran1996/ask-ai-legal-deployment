@@ -1,11 +1,11 @@
 import Stripe from 'stripe';
 
+export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+  apiVersion: '2025-05-28.basil',
+}); 
+
 // Add this function to support create-checkout/route.ts
 export async function createCheckoutSession(priceId: string, userId: string) {
-  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-    apiVersion: '2025-05-28.basil',
-  });
-  
   return await stripe.checkout.sessions.create({
     payment_method_types: ['card'],
     mode: 'payment',
