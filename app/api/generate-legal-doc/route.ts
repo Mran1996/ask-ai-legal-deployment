@@ -1,10 +1,6 @@
 import { OpenAI } from 'openai';
 import { getRelevantCaseLaw } from '@/lib/perplexity';
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY!,
-});
-
 export async function POST(req: Request) {
   try {
     const {
@@ -95,6 +91,10 @@ ${userInput}
 ${includeCaseLaw ? `Relevant Case Law:\n${caseLaw}` : ''}
 
 Generate a complete legal document in HTML format using the provided CSS classes. Ensure proper formatting and spacing for court filing.`;
+
+    const openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY!,
+    });
 
     const response = await openai.chat.completions.create({
       model: 'gpt-4-turbo-preview',

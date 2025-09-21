@@ -6,11 +6,6 @@ import { OpenAI } from 'openai';
 
 export const runtime = 'nodejs';
 
-// Initialize OpenAI client
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY!,
-});
-
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
@@ -161,6 +156,11 @@ PAGE LENGTH REQUIREMENTS:
 - Complex Petitions (habeas corpus, post-conviction relief): 15–20 pages minimum
 
 Generate a complete, professional legal document using ONLY the information provided above.`;
+
+    // Initialize OpenAI client
+    const openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY!,
+    });
 
     // Call OpenAI to generate the document
     const completion = await openai.chat.completions.create({
