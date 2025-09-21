@@ -247,10 +247,17 @@ export function EnhancedChatInterface({
   // Check if speech recognition is supported
   useEffect(() => {
     const isSupported = "SpeechRecognition" in window || "webkitSpeechRecognition" in window
-    setSpeechSupported(isSupported)
+    const isSecureContext = window.isSecureContext || location.protocol === 'https:'
+    
+    // Speech recognition requires HTTPS in most browsers
+    const fullySupported = isSupported && isSecureContext
+    
+    setSpeechSupported(fullySupported)
     
     if (!isSupported) {
       console.warn("Speech recognition not supported in this browser")
+    } else if (!isSecureContext) {
+      console.warn("Speech recognition requires HTTPS connection")
     }
   }, [])
 
@@ -383,7 +390,12 @@ export function EnhancedChatInterface({
 
   const startListening = () => {
     if (!speechSupported) {
-      alert("Speech recognition is not supported in this browser. Please use Chrome, Edge, or Safari.")
+      const isSecureContext = window.isSecureContext || location.protocol === 'https:'
+      if (!isSecureContext) {
+        alert("Speech recognition requires HTTPS connection. Please access the site via https://askailegal.com")
+      } else {
+        alert("Speech recognition is not supported in this browser. Please use Chrome, Edge, or Safari.")
+      }
       return
     }
 
@@ -397,6 +409,7 @@ export function EnhancedChatInterface({
       recognition.continuous = false
       recognition.interimResults = false
       recognition.lang = 'en-US'
+      recognition.maxAlternatives = 1
 
       recognition.onresult = (event: any) => {
         const transcript = event.results[0][0].transcript
@@ -413,14 +426,26 @@ export function EnhancedChatInterface({
           case 'not-allowed':
             alert("Microphone permission denied. Please allow microphone access and try again.")
             break
+          case 'service-not-allowed':
+            alert("Speech recognition service is not available. This may be due to:\n• Using HTTP instead of HTTPS\n• Browser security settings\n• Network restrictions\n\nPlease try using Chrome, Edge, or Safari on a secure connection.")
+            break
           case 'no-speech':
             alert("No speech detected. Please try speaking again.")
             break
           case 'network':
             alert("Network error occurred. Please check your connection and try again.")
             break
+          case 'aborted':
+            alert("Speech recognition was interrupted. Please try again.")
+            break
+          case 'audio-capture':
+            alert("No microphone found. Please check your microphone connection.")
+            break
+          case 'language-not-supported':
+            alert("Language not supported. Please try again.")
+            break
           default:
-            alert("Speech recognition failed. Please try again.")
+            alert(`Speech recognition failed: ${event.error}. Please try again.`)
         }
       }
 
