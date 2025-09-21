@@ -246,7 +246,12 @@ export function EnhancedChatInterface({
 
   // Check if speech recognition is supported
   useEffect(() => {
-    setSpeechSupported("SpeechRecognition" in window || "webkitSpeechRecognition" in window)
+    const isSupported = "SpeechRecognition" in window || "webkitSpeechRecognition" in window
+    setSpeechSupported(isSupported)
+    
+    if (!isSupported) {
+      console.warn("Speech recognition not supported in this browser")
+    }
   }, [])
 
   // Auto-scroll to bottom when messages change
@@ -377,31 +382,58 @@ export function EnhancedChatInterface({
   }
 
   const startListening = () => {
-    if (!speechSupported) return
+    if (!speechSupported) {
+      alert("Speech recognition is not supported in this browser. Please use Chrome, Edge, or Safari.")
+      return
+    }
 
     setIsListening(true)
 
-    // @ts-ignore - TypeScript doesn't know about webkitSpeechRecognition
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
-    const recognition = new SpeechRecognition()
+    try {
+      // @ts-ignore - TypeScript doesn't know about webkitSpeechRecognition
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
+      const recognition = new SpeechRecognition()
 
-    recognition.continuous = false
-    recognition.interimResults = false
+      recognition.continuous = false
+      recognition.interimResults = false
+      recognition.lang = 'en-US'
 
-    recognition.onresult = (event: any) => {
-      const transcript = event.results[0][0].transcript
-      setInputValue((prev) => prev + " " + transcript)
-    }
+      recognition.onresult = (event: any) => {
+        const transcript = event.results[0][0].transcript
+        setInputValue((prev) => prev + " " + transcript)
+        console.log("Speech recognition result:", transcript)
+      }
 
-    recognition.onerror = () => {
+      recognition.onerror = (event: any) => {
+        console.error("Speech recognition error:", event.error)
+        setIsListening(false)
+        
+        // Provide user-friendly error messages
+        switch (event.error) {
+          case 'not-allowed':
+            alert("Microphone permission denied. Please allow microphone access and try again.")
+            break
+          case 'no-speech':
+            alert("No speech detected. Please try speaking again.")
+            break
+          case 'network':
+            alert("Network error occurred. Please check your connection and try again.")
+            break
+          default:
+            alert("Speech recognition failed. Please try again.")
+        }
+      }
+
+      recognition.onend = () => {
+        setIsListening(false)
+      }
+
+      recognition.start()
+    } catch (error) {
+      console.error("Failed to start speech recognition:", error)
       setIsListening(false)
+      alert("Failed to start speech recognition. Please try again.")
     }
-
-    recognition.onend = () => {
-      setIsListening(false)
-    }
-
-    recognition.start()
   }
 
   const stopListening = () => {
@@ -777,7 +809,7 @@ export function EnhancedChatInterface({
               minHeight: '2.5rem', // initial height
             }}
           />
-          {speechSupported && (
+          {speechSupported ? (
             <Button
               type="button"
               size="icon"
@@ -786,8 +818,19 @@ export function EnhancedChatInterface({
                 isListening ? "bg-red-500 hover:bg-red-600" : "bg-emerald-500 hover:bg-emerald-600 text-white"
               }`}
               disabled={isWaitingForResponse || isUploading}
+              title={isListening ? "Stop recording" : "Start voice input"}
             >
               {isListening ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+            </Button>
+          ) : (
+            <Button
+              type="button"
+              size="icon"
+              className="rounded-full h-9 w-9 sm:h-10 sm:w-10 bg-gray-400 cursor-not-allowed"
+              disabled
+              title="Voice input not supported in this browser"
+            >
+              <Mic className="h-4 w-4" />
             </Button>
           )}
           <Button
