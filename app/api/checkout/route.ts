@@ -1,14 +1,14 @@
 import Stripe from 'stripe';
-
-// Initialize Stripe client
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2025-05-28.basil',
-});
 import { NextResponse } from 'next/server';
 import { PRICE_MAP, PRODUCTS } from '@/lib/stripe-config';
 
 export async function POST(req: Request) {
   try {
+    // Initialize Stripe client
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+      apiVersion: '2025-05-28.basil',
+    });
+    
     // Check if Stripe client is available
     if (!stripe) {
       return NextResponse.json(
