@@ -245,71 +245,22 @@ export function EnhancedChatInterface({
     "How much time do I have to respond?": "✍️",
   };
 
-  // Check if speech recognition is supported and test availability
+  // Check if speech recognition is supported
   useEffect(() => {
-    const checkSpeechSupport = async () => {
-      const isSupported = "SpeechRecognition" in window || "webkitSpeechRecognition" in window
-      const isSecureContext = window.isSecureContext || location.protocol === 'https:'
-      
-      if (!isSupported || !isSecureContext) {
-        setSpeechSupported(false)
-        if (!isSupported) {
-          console.warn("Speech recognition not supported in this browser")
-        } else if (!isSecureContext) {
-          console.warn("Speech recognition requires HTTPS connection")
-        }
-        return
-      }
-
-      // Test if speech recognition service is actually available
-      try {
-        // @ts-ignore
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
-        const testRecognition = new SpeechRecognition()
-        
-        // Set up a quick test
-        testRecognition.continuous = false
-        testRecognition.interimResults = false
-        testRecognition.lang = 'en-US'
-        
-        // Test if the service is available without actually starting
-        const testPromise = new Promise((resolve) => {
-          testRecognition.onerror = (event: any) => {
-            if (event.error === 'service-not-allowed') {
-              console.warn("Speech recognition service not available")
-              setSpeechServiceAvailable(false)
-              setSpeechSupported(false)
-            }
-            resolve(false)
-          }
-          
-          testRecognition.onstart = () => {
-            // If it starts successfully, the service is available
-            testRecognition.stop()
-            setSpeechServiceAvailable(true)
-            setSpeechSupported(true)
-            resolve(true)
-          }
-          
-          // Start the test
-          testRecognition.start()
-          
-          // Timeout after 2 seconds
-          setTimeout(() => {
-            testRecognition.stop()
-            resolve(false)
-          }, 2000)
-        })
-        
-        await testPromise
-      } catch (error) {
-        console.warn("Speech recognition test failed:", error)
-        setSpeechSupported(false)
-        setSpeechServiceAvailable(false)
-      }
+    const isSupported = "SpeechRecognition" in window || "webkitSpeechRecognition" in window
+    const isSecureContext = window.isSecureContext || location.protocol === 'https:'
+    
+    // Speech recognition requires HTTPS in most browsers
+    const fullySupported = isSupported && isSecureContext
+    
+    setSpeechSupported(fullySupported)
+    setSpeechServiceAvailable(true) // Assume it's available until proven otherwise
+    
+    if (!isSupported) {
+      console.warn("Speech recognition not supported in this browser")
+    } else if (!isSecureContext) {
+      console.warn("Speech recognition requires HTTPS connection")
     }
-
-    checkSpeechSupport()
   }, [])
 
   // Auto-scroll to bottom when messages change
@@ -440,12 +391,7 @@ export function EnhancedChatInterface({
   }
 
   const startListening = () => {
-    if (!speechSupported || !speechServiceAvailable) {
-      if (!speechServiceAvailable) {
-        console.warn("Speech recognition service is not available")
-        return
-      }
-      
+    if (!speechSupported) {
       const isSecureContext = window.isSecureContext || location.protocol === 'https:'
       if (!isSecureContext) {
         alert("Speech recognition requires HTTPS connection. Please access the site via https://askailegal.com")
@@ -465,13 +411,6 @@ export function EnhancedChatInterface({
         throw new Error("SpeechRecognition not available")
       }
 
-      // Double-check that the service is available before starting
-      if (!speechServiceAvailable) {
-        console.warn("Speech recognition service is not available, skipping start")
-        setIsListening(false)
-        return
-      }
-
       const recognition = new SpeechRecognition()
 
       recognition.continuous = false
@@ -489,11 +428,11 @@ export function EnhancedChatInterface({
         console.error("Speech recognition error:", event.error)
         setIsListening(false)
         
-        // Don't show alerts for service-not-allowed to avoid spam
+        // Handle service-not-allowed gracefully
         if (event.error === 'service-not-allowed') {
           console.warn("Speech recognition service not available. This is common in some browsers or network environments.")
           setSpeechServiceAvailable(false)
-          // Silently fail and let user know via UI
+          // Show a subtle notification instead of alert
           return
         }
         
@@ -503,13 +442,14 @@ export function EnhancedChatInterface({
             alert("Microphone permission denied. Please allow microphone access and try again.")
             break
           case 'no-speech':
-            alert("No speech detected. Please try speaking again.")
+            // Don't show alert for no-speech, just log it
+            console.warn("No speech detected")
             break
           case 'network':
             alert("Network error occurred. Please check your connection and try again.")
             break
           case 'aborted':
-            alert("Speech recognition was interrupted. Please try again.")
+            console.warn("Speech recognition was interrupted")
             break
           case 'audio-capture':
             alert("No microphone found. Please check your microphone connection.")
