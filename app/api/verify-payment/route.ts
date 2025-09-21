@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { stripe } from '@/lib/stripe-server';
+import Stripe from 'stripe';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
 import { supabase } from '@/lib/supabaseClient';
@@ -10,6 +10,10 @@ export async function POST(req: Request) {
     if (!process.env.STRIPE_SECRET_KEY) {
       throw new Error('STRIPE_SECRET_KEY environment variable is not set.');
     }
+    
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+      apiVersion: '2025-05-28.basil',
+    });
     
     // Check authentication
     const session = await getServerSession(authOptions);
