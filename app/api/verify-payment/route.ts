@@ -5,12 +5,12 @@ import { authOptions } from '@/lib/auth';
 import { supabase } from '@/lib/supabaseClient';
 import { PLANS, type PlanName } from '@/lib/stripe-plans';
 
-if (!process.env.STRIPE_SECRET_KEY) {
-  throw new Error('STRIPE_SECRET_KEY environment variable is not set.');
-}
-
 export async function POST(req: Request) {
   try {
+    if (!process.env.STRIPE_SECRET_KEY) {
+      throw new Error('STRIPE_SECRET_KEY environment variable is not set.');
+    }
+    
     // Check authentication
     const session = await getServerSession(authOptions);
     if (!session?.user) {
