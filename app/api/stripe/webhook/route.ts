@@ -1,7 +1,4 @@
 import Stripe from 'stripe';
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2025-05-28.basil',
-});
 import { headers } from 'next/headers';
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabaseClient';
@@ -57,6 +54,10 @@ export async function POST(req: Request) {
         { status: 400 }
       );
     }
+
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+      apiVersion: '2025-05-28.basil',
+    });
 
     let event;
 
