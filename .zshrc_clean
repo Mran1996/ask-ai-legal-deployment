@@ -1,0 +1,15 @@
+# Clean zsh configuration
+export PATH="/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$PATH"
+
+# Basic shell settings
+setopt AUTO_CD
+setopt HIST_IGNORE_DUPS
+setopt HIST_IGNORE_SPACE
+
+# Aliases
+alias ll='ls -la'
+alias la='ls -A'
+alias l='ls -CF'
+
+# Clean prompt
+export PS1='%n@%m %1~ $ '

@@ -1,0 +1,247 @@
+/* Legal Document Styles */
+.legal-document {
+  font-family: 'Times New Roman', serif;
+  font-size: 16px;
+  line-height: 1.75;
+  padding: 2rem;
+  max-width: 800px;
+  margin: auto;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  min-height: 600px;
+  white-space: pre-wrap;
+  text-align: left;
+}
+
+/* Page size and margins for print */
+@page {
+  size: 8.5in 11in;
+  margin: 1in;
+}
+
+.clerks-stamp-area {
+  border: 1px dashed #999;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  text-align: center;
+  color: #666;
+}
+
+.stamp-indicator {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #666;
+  font-style: italic;
+  font-size: 14px;
+  font-family: Arial, sans-serif;
+}
+
+.court-header {
+  text-align: center;
+  font-weight: bold;
+  margin-bottom: 2rem;
+  text-transform: uppercase;
+}
+
+.court-header p {
+  margin: 0.3rem 0;
+}
+
+.caption-box {
+  border: 1px solid #000;
+  padding: 1rem;
+  margin-bottom: 2rem;
+  font-weight: bold;
+  text-align: left;
+}
+
+.document-title {
+  text-align: center;
+  font-size: 18px;
+  font-weight: bold;
+  text-transform: uppercase;
+  margin-bottom: 2rem;
+  text-decoration: underline;
+}
+
+.section {
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+}
+
+.section h3 {
+  font-weight: bold;
+  text-transform: uppercase;
+  border-bottom: 1px solid #000;
+  padding-bottom: 0.3rem;
+}
+
+.section p {
+  text-align: justify;
+  margin: 1rem 0;
+  text-indent: 0.5in;
+  line-height: 2;
+}
+
+.legal-list {
+  list-style-type: decimal;
+  margin-left: 2rem;
+  margin-bottom: 1rem;
+}
+
+.legal-list li {
+  margin-bottom: 0.5rem;
+}
+
+.signature-block,
+.judge-block {
+  margin-top: 4rem;
+}
+
+.certificate-service {
+  margin-top: 4rem;
+  border-top: 1px solid #000;
+  padding-top: 2rem;
+}
+
+.service-details {
+  margin: 1rem 0;
+  padding-left: 2rem;
+}
+
+.service-method {
+  margin: 1rem 0;
+  padding-left: 2rem;
+}
+
+.running-header {
+  font-size: 12px;
+  text-align: right;
+  margin-bottom: 2rem;
+  color: #666;
+}
+
+.page-footer {
+  text-align: center;
+  margin-top: 4rem;
+  font-size: 12px;
+  color: #666;
+}
+
+.caption-left {
+  float: left;
+  width: 50%;
+}
+
+.caption-right {
+  float: right;
+  width: 50%;
+}
+
+.party-designation {
+  margin-left: 2rem;
+  font-style: italic;
+}
+
+.versus {
+  margin: 0.5rem 0;
+  text-align: center;
+}
+
+.subtitle {
+  display: block;
+  font-size: 0.9em;
+  margin-top: 0.5rem;
+  text-decoration: none;
+}
+
+/* Page numbers */
+.page-number {
+  position: fixed;
+  bottom: 0.5in;
+  right: 0.5in;
+  font-size: 12px;
+}
+
+.page-number::after {
+  content: counter(page);
+}
+
+/* Print styles */
+@media print {
+  .legal-document {
+    border: none;
+    padding: 0;
+    max-width: none;
+    margin: 0;
+    font-size: 12pt;
+    counter-reset: page;
+  }
+
+  .clerks-stamp-area {
+    border: none;
+  }
+
+  .stamp-indicator {
+    display: none;
+  }
+
+  /* Ensure headers repeat on every page */
+  .running-header {
+    position: running(header);
+    text-align: center;
+    font-size: 10pt;
+    margin-bottom: 0.5in;
+  }
+
+  /* Footer with page numbers */
+  .page-footer {
+    position: running(footer);
+    text-align: center;
+    font-size: 10pt;
+  }
+
+  /* Avoid orphaned headings */
+  h1, h2, h3, h4, h5, h6 {
+    page-break-after: avoid;
+  }
+
+  /* Avoid orphaned list items */
+  li {
+    page-break-inside: avoid;
+  }
+
+  /* Ensure proper page breaks */
+  .section {
+    page-break-inside: avoid;
+  }
+
+  .signature-block,
+  .certificate-service {
+    page-break-inside: avoid;
+  }
+
+  /* Page margins and size */
+  @page {
+    size: letter;
+    margin: 1in;
+
+    @top-center {
+      content: element(header);
+    }
+
+    @bottom-center {
+      content: element(footer);
+    }
+  }
+
+  /* First page special handling */
+  @page :first {
+    @top-center {
+      content: none;
+    }
+  }
+} 

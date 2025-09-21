@@ -1,0 +1,147 @@
+{
+  "mcpServers": {
+    "legal-document-server": {
+      "command": "node",
+      "args": ["./mcp-legal-server.js"],
+      "env": {
+        "NODE_ENV": "production"
+      }
+    }
+  },
+  "tools": [
+    {
+      "name": "generate_legal_document",
+      "description": "Generate a legal document with jurisdiction-aware formatting",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "documentType": {
+            "type": "string",
+            "description": "Type of legal document (e.g., 'State Post-Conviction Petition', 'Motion to Dismiss')"
+          },
+          "state": {
+            "type": "string",
+            "description": "State jurisdiction (e.g., 'CA', 'NY', 'TX')"
+          },
+          "county": {
+            "type": "string",
+            "description": "County name (e.g., 'Los Angeles', 'Kings')"
+          },
+          "petitioner": {
+            "type": "string",
+            "description": "Petitioner/Plaintiff name"
+          },
+          "respondent": {
+            "type": "string",
+            "description": "Respondent/Defendant name"
+          },
+          "caseNumber": {
+            "type": "string",
+            "description": "Case number"
+          },
+          "facts": {
+            "type": "string",
+            "description": "Factual background"
+          },
+          "issues": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Legal issues to address"
+          }
+        },
+        "required": ["documentType", "state", "county", "petitioner", "respondent"]
+      }
+    },
+    {
+      "name": "validate_jurisdiction",
+      "description": "Validate jurisdiction and detect conflicts",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "state": {
+            "type": "string",
+            "description": "State jurisdiction"
+          },
+          "documentType": {
+            "type": "string",
+            "description": "Type of legal document"
+          },
+          "forumHints": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Forum indicators (e.g., 'federal', 'state court')"
+          }
+        },
+        "required": ["state", "documentType"]
+      }
+    },
+    {
+      "name": "get_legal_standards",
+      "description": "Get state-specific legal standards for document type",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "state": {
+            "type": "string",
+            "description": "State jurisdiction"
+          },
+          "documentType": {
+            "type": "string",
+            "description": "Type of legal document"
+          }
+        },
+        "required": ["state", "documentType"]
+      }
+    },
+    {
+      "name": "format_court_caption",
+      "description": "Format court caption for specific jurisdiction",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "state": {
+            "type": "string",
+            "description": "State jurisdiction"
+          },
+          "county": {
+            "type": "string",
+            "description": "County name"
+          },
+          "courtName": {
+            "type": "string",
+            "description": "Optional court name override"
+          }
+        },
+        "required": ["state"]
+      }
+    },
+    {
+      "name": "list_supported_jurisdictions",
+      "description": "List all supported jurisdictions and their court naming conventions",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      }
+    }
+  ],
+  "resources": [
+    {
+      "uri": "file://./lib/jurisdiction.ts",
+      "name": "Jurisdiction Logic",
+      "description": "Core jurisdiction handling functions",
+      "mimeType": "text/typescript"
+    },
+    {
+      "uri": "file://./lib/prompts/universal-system.ts",
+      "name": "System Prompt",
+      "description": "Universal system prompt for document generation",
+      "mimeType": "text/typescript"
+    },
+    {
+      "uri": "file://./app/api/generate-document/route.ts",
+      "name": "API Route",
+      "description": "Document generation API endpoint",
+      "mimeType": "text/typescript"
+    }
+  ]
+}
