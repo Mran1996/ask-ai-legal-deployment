@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import {
   BadgeCheck,
   CreditCard,
@@ -17,6 +17,26 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 export default function BillingPage() {
   const [isPaymentExpanded, setIsPaymentExpanded] = useState(false)
+  const [billingData, setBillingData] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+
+  useEffect(() => {
+    async function fetchBilling() {
+      try {
+        setLoading(true)
+        const res = await fetch("/api/billing")
+        if (!res.ok) throw new Error("Failed to fetch billing data")
+        const data = await res.json()
+        setBillingData(data)
+      } catch (err) {
+        setError(err.message)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchBilling()
+  }, [])
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-12">
@@ -25,83 +45,11 @@ export default function BillingPage() {
         Get professional legal documents — no law firm required.
       </p>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Quick Legal Start */}
-        <div className="border rounded-xl p-6 shadow-md">
-          <h3 className="text-xl font-semibold mb-2">💼 Quick Legal Start</h3>
-          <p className="text-3xl font-bold text-green-600 mb-4">$59</p>
-          <ul className="text-sm space-y-2 mb-4">
-            <li>✅ Up to 15 pages</li>
-            <li>✅ 1 AI-generated legal response</li>
-            <li>✅ Plain-language summary</li>
-            <li>✅ No legal citations</li>
-            <li>✅ PDF + DOCX download included</li>
-          </ul>
-          <p className="text-sm text-gray-600 mb-2">
-            🧑‍⚖️ You'll be guided step-by-step and receive a ready-to-file document — without the cost of hiring an attorney.
-          </p>
-          <p className="text-green-600 text-sm font-medium">Ideal for notices, demand letters, or simple disputes</p>
-          <button className="mt-4 w-full bg-green-600 text-white rounded-lg py-2 hover:bg-green-700">
-            Get Quick Help
-          </button>
-        </div>
-
-        {/* Court-Ready Docs */}
-        <div className="border-2 border-green-600 rounded-xl p-6 shadow-lg relative">
-          <span className="absolute top-4 right-4 text-xs bg-green-600 text-white px-2 py-1 rounded-full">
-            Most Popular
-          </span>
-          <h3 className="text-xl font-semibold mb-2">⚖️ Court-Ready Docs</h3>
-          <p className="text-3xl font-bold text-green-600 mb-4">$179</p>
-          <ul className="text-sm space-y-2 mb-4">
-            <li>✅ Up to 30 pages (up to 3 docs)</li>
-            <li>✅ Tailored AI legal response</li>
-            <li>✅ Legal suggestions included</li>
-            <li>✅ Case Success Analysis</li>
-            <li>✅ Step-by-step filing checklist</li>
-            <li>✅ 1 revision included</li>
-            <li>✅ Priority email support</li>
-            <li>✅ PDF + DOCX formatting</li>
-          </ul>
-          <p className="text-sm text-gray-600 mb-2">
-            🧑‍⚖️ Guided like an attorney would — fast, affordable, and ready to file.
-          </p>
-          <p className="text-green-600 text-sm font-medium">
-            Best for criminal filings, post-conviction motions, civil claims, or complex disputes
-          </p>
-          <button className="mt-4 w-full bg-green-600 text-white rounded-lg py-2 hover:bg-green-700">
-            Get File-Ready Help
-          </button>
-        </div>
-
-        {/* CaseBuilder Pro */}
-        <div className="border rounded-xl p-6 shadow-md">
-          <h3 className="text-xl font-semibold mb-2">🔒 CaseBuilder Pro</h3>
-          <p className="text-3xl font-bold text-green-600 mb-4">$549</p>
-          <ul className="text-sm space-y-2 mb-4">
-            <li>✅ Up to 75 pages</li>
-            <li>✅ Attorney-quality AI response</li>
-            <li>✅ Includes case law + citations</li>
-            <li>✅ 2 revisions included</li>
-            <li>✅ Case Success Analysis</li>
-            <li>✅ Legal strategy suggestions</li>
-            <li>✅ Priority email + phone support</li>
-            <li>✅ PDF + DOCX output</li>
-            <li>✅ Filing checklist included</li>
-          </ul>
-          <p className="text-sm text-gray-600 mb-2">
-            🧑‍⚖️ Built for high-stakes legal actions — get a court-ready document you can trust.
-          </p>
-          <p className="text-green-600 text-sm font-medium">
-            Perfect for major disputes, motions to vacate, appeals, or multi-doc cases
-          </p>
-          <button className="mt-4 w-full bg-green-600 text-white rounded-lg py-2 hover:bg-green-700">
-            Get Legal Draft Help
-          </button>
-        </div>
-      </div>
+      {/* Removed hardcoded plan placeholders. Only real Stripe data will be shown below. */}
 
       <Tabs defaultValue="overview" className="w-full mt-8">
+        {loading && <div className="text-center py-8">Loading billing data...</div>}
+        {error && <div className="text-center text-red-600 py-8">{error}</div>}
         <TabsList className="mb-6">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="payment-methods">Payment Methods</TabsTrigger>
@@ -109,75 +57,66 @@ export default function BillingPage() {
         </TabsList>
 
         <TabsContent value="overview">
-          <Card className="mb-6">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-lg font-medium flex items-center">
-                <BadgeCheck className="text-teal-600 w-5 h-5 mr-2" />
-                Current Plan
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="font-semibold text-xl text-gray-900">Pro Plan</h3>
-                  <p className="text-gray-500 text-sm mt-1">Billed monthly • Renews on May 15, 2025</p>
-                </div>
-                <div className="text-2xl font-bold text-gray-900">
-                  $149<span className="text-sm font-normal text-gray-500">/month</span>
-                </div>
-              </div>
-
-              <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                <div className="flex items-start">
-                  <BadgeCheck className="w-4 h-4 text-teal-600 mt-0.5 mr-2 flex-shrink-0" />
-                  <span>Unlimited AI legal assistant access</span>
-                </div>
-                <div className="flex items-start">
-                  <BadgeCheck className="w-4 h-4 text-teal-600 mt-0.5 mr-2 flex-shrink-0" />
-                  <span>Priority support response</span>
-                </div>
-                <div className="flex items-start">
-                  <BadgeCheck className="w-4 h-4 text-teal-600 mt-0.5 mr-2 flex-shrink-0" />
-                  <span>Document analysis & storage</span>
-                </div>
-                <div className="flex items-start">
-                  <BadgeCheck className="w-4 h-4 text-teal-600 mt-0.5 mr-2 flex-shrink-0" />
-                  <span>Advanced legal research tools</span>
-                </div>
-              </div>
-            </CardContent>
-            <CardFooter className="flex flex-col sm:flex-row gap-3 justify-between border-t pt-6">
-              <Button variant="outline">Change Plan</Button>
-              <Button variant="destructive" className="bg-red-100 text-red-600 hover:bg-red-200 hover:text-red-700">
-                Cancel Subscription
-              </Button>
-            </CardFooter>
-          </Card>
-
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-lg font-medium flex items-center">
-                <CreditCard className="text-teal-600 w-5 h-5 mr-2" />
-                Payment Method
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div className="flex items-center">
-                  <div className="w-12 h-8 bg-blue-600 rounded mr-4 flex items-center justify-center text-white font-bold">
-                    VISA
-                  </div>
+          {billingData && (
+            <Card className="mb-6">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg font-medium flex items-center">
+                  <BadgeCheck className="text-teal-600 w-5 h-5 mr-2" />
+                  Current Plan
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center justify-between">
                   <div>
-                    <p className="font-medium">Visa ending in 4242</p>
-                    <p className="text-sm text-gray-500">Expires 03/27</p>
+                    <h3 className="font-semibold text-xl text-gray-900">
+                      {billingData.subscription?.plan?.nickname || 'No active subscription'}
+                    </h3>
+                    <p className="text-gray-500 text-sm mt-1">
+                      {billingData.subscription?.status ? `Status: ${billingData.subscription.status}` : 'No subscription'}
+                    </p>
+                  </div>
+                  <div className="text-2xl font-bold text-gray-900">
+                    {billingData.subscription?.plan?.amount ? `$${(billingData.subscription.plan.amount / 100).toFixed(2)}` : '--'}
+                    <span className="text-sm font-normal text-gray-500">/month</span>
                   </div>
                 </div>
-                <Button variant="ghost" size="sm">
-                  Update
+              </CardContent>
+              <CardFooter className="flex flex-col sm:flex-row gap-3 justify-between border-t pt-6">
+                <Button variant="outline">Change Plan</Button>
+                <Button variant="destructive" className="bg-red-100 text-red-600 hover:bg-red-200 hover:text-red-700">
+                  Cancel Subscription
                 </Button>
-              </div>
-            </CardContent>
-          </Card>
+              </CardFooter>
+            </Card>
+          )}
+          {billingData && billingData.paymentMethods && billingData.paymentMethods.length > 0 && (
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg font-medium flex items-center">
+                  <CreditCard className="text-teal-600 w-5 h-5 mr-2" />
+                  Payment Method
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div className="flex items-center">
+                    <div className="w-12 h-8 bg-blue-600 rounded mr-4 flex items-center justify-center text-white font-bold">
+                      {billingData.paymentMethods[0].card.brand.toUpperCase()}
+                    </div>
+                    <div>
+                      <p className="font-medium">
+                        {billingData.paymentMethods[0].card.brand} ending in {billingData.paymentMethods[0].card.last4}
+                      </p>
+                      <p className="text-sm text-gray-500">
+                        Expires {billingData.paymentMethods[0].card.exp_month}/{billingData.paymentMethods[0].card.exp_year}
+                      </p>
+                    </div>
+                  </div>
+                  <Button variant="ghost" size="sm">Update</Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </TabsContent>
 
         <TabsContent value="payment-methods">
@@ -219,47 +158,48 @@ export default function BillingPage() {
         </TabsContent>
 
         <TabsContent value="history">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Billing History</CardTitle>
-              <CardDescription>View and download your past invoices</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {[
-                  { date: "Apr 15, 2025", amount: "$149.00", status: "Paid", id: "INV-2025-0412" },
-                  { date: "Mar 15, 2025", amount: "$149.00", status: "Paid", id: "INV-2025-0311" },
-                  { date: "Feb 15, 2025", amount: "$149.00", status: "Paid", id: "INV-2025-0215" },
-                ].map((invoice, i) => (
-                  <div
-                    key={i}
-                    className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 border rounded-lg gap-3"
-                  >
-                    <div className="flex items-center gap-4">
-                      <CalendarCheck className="w-5 h-5 text-gray-400" />
-                      <div>
-                        <p className="font-medium">{invoice.date}</p>
-                        <p className="text-xs text-gray-500">{invoice.id}</p>
+          {billingData && billingData.invoices && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Billing History</CardTitle>
+                <CardDescription>View and download your past invoices</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {billingData.invoices.length === 0 && <div>No invoices found.</div>}
+                  {billingData.invoices.map((invoice, i) => (
+                    <div
+                      key={invoice.id}
+                      className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 border rounded-lg gap-3"
+                    >
+                      <div className="flex items-center gap-4">
+                        <CalendarCheck className="w-5 h-5 text-gray-400" />
+                        <div>
+                          <p className="font-medium">{new Date(invoice.created * 1000).toLocaleDateString()}</p>
+                          <p className="text-xs text-gray-500">{invoice.number || invoice.id}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center ml-9 sm:ml-0">
+                        <div className="flex items-center mr-6">
+                          <DollarSign className="w-4 h-4 text-green-600 mr-1" />
+                          <span className="font-medium">${(invoice.amount_paid / 100).toFixed(2)}</span>
+                        </div>
+                        <div className="flex items-center gap-1 bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs mr-4">
+                          <span className="w-2 h-2 rounded-full bg-green-500"></span>
+                          {invoice.status}
+                        </div>
+                        <Button variant="ghost" size="sm" asChild>
+                          <a href={invoice.invoice_pdf} target="_blank" rel="noopener noreferrer">
+                            <Download className="h-4 w-4" />
+                          </a>
+                        </Button>
                       </div>
                     </div>
-                    <div className="flex items-center ml-9 sm:ml-0">
-                      <div className="flex items-center mr-6">
-                        <DollarSign className="w-4 h-4 text-green-600 mr-1" />
-                        <span className="font-medium">{invoice.amount}</span>
-                      </div>
-                      <div className="flex items-center gap-1 bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs mr-4">
-                        <span className="w-2 h-2 rounded-full bg-green-500"></span>
-                        {invoice.status}
-                      </div>
-                      <Button variant="ghost" size="sm">
-                        <Download className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </TabsContent>
       </Tabs>
 
