@@ -1,11 +1,7 @@
 import Stripe from 'stripe';
 
-// Check if we're in build time and skip operations
-const isBuildTime = process.env.NODE_ENV === 'production' && !process.env.VERCEL_ENV;
-const isVercelBuild = process.env.VERCEL === '1' && process.env.NODE_ENV === 'production';
-
-// Initialize Stripe client only if not in build time
-const stripe = (!isBuildTime && !isVercelBuild && process.env.STRIPE_SECRET_KEY) ? new Stripe(process.env.STRIPE_SECRET_KEY, {
+// Always initialize Stripe client if secret key is present
+const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY, {
   apiVersion: '2025-05-28.basil',
 }) : null;
 import { NextResponse } from 'next/server';
@@ -13,10 +9,10 @@ import { PRICE_MAP, PRODUCTS } from '@/lib/stripe-config';
 
 export async function POST(req: Request) {
   try {
-    // Skip during build time
+    // Check for Stripe client
     if (!stripe) {
       return NextResponse.json(
-        { error: 'Stripe client not available during build time' },
+        { error: 'Stripe client not available. Please check STRIPE_SECRET_KEY.' },
         { status: 503 }
       );
     }
