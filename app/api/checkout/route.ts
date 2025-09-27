@@ -35,6 +35,14 @@ export async function POST(req: Request) {
       process.env.STRIPE_PREMIUM_MONTHLY_PRICE_ID ||
       process.env.STRIPE_COURT_READY_PRICE_ID;
 
+    // Stripe debug log for runtime diagnosis
+    console.log('[STRIPE DEBUG]', {
+      stripeKey: process.env.STRIPE_SECRET_KEY ? process.env.STRIPE_SECRET_KEY.slice(0,8) + '...' : 'undefined',
+      priceId,
+      env: process.env.NODE_ENV,
+      vercel: process.env.VERCEL,
+    });
+
     // Debug log: print Stripe key and price ID (redacted)
     console.log('[STRIPE DEBUG]', {
       stripeKey: process.env.STRIPE_SECRET_KEY ? process.env.STRIPE_SECRET_KEY.slice(0,8) + '...' : 'undefined',
