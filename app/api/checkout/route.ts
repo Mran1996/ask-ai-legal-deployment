@@ -30,13 +30,20 @@ export async function POST(req: Request) {
       );
     }
 
-    // Get the price ID from environment or use a fallback
-    const priceId = process.env.STRIPE_COURT_READY_PRICE_ID;
-    
-    if (!priceId) {
+    // Resolve price ID from the PRICE_MAP using the provided plan, then fall back to
+    // any known single-price env vars (your env uses STRIPE_PREMIUM_MONTHLY_PRICE_ID).
+    // This avoids checkout failing when the exact env name expected by older code
+    // isn't present.
+    const priceId = PRICE_MAP[plan as any] ||
+      process.env.NEXT_PUBLIC_STRIPE_PREMIUM_MONTHLY_PRICE_ID ||
+      process.env.STRIPE_PREMIUM_MONTHLY_PRICE_ID ||
+      process.env.STRIPE_COURT_READY_PRICE_ID;
+
+    // Validate priceId format
+    if (!priceId || !/^price_/.test(priceId)) {
       return NextResponse.json(
-        { error: 'Stripe price ID is not configured. Please set STRIPE_COURT_READY_PRICE_ID in your environment variables.' },
-        { status: 500 }
+        { error: 'Stripe price ID is missing or invalid. Please use a valid price ID (starts with price_...).' },
+        { status: 400 }
       );
     }
 
